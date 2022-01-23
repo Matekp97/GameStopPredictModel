@@ -1,6 +1,6 @@
-# AmericanExpressStudy
+# GameStopStudy
 
-I analyzed several datasets before choosing this one, but they all turned out to be white noise. Later I remembered what happened to Gamestop actions last month, so I decided to analyze the adjusted closure of the latter. 
+I've decided to analyse and study the action of Gamestop after the big raise that happened in February 2021. M I remembered what happened to Gamestop actions last month, so I decided to analyze the adjusted closure of the latter. 
 I consider a daily analysis and picked a whole year, as time window, to get enough data.
 
 
