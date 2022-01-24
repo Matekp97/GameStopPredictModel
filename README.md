@@ -1,45 +1,21 @@
 # GameStopStudy
 
-I've decided to analyse and study the action of Gamestop after the big raise that happened in February 2021. M I remembered what happened to Gamestop actions last month, so I decided to analyze the adjusted closure of the latter. 
+I've decided to analyse and study the action of Gamestop, more precisely the adjusted closure after the big raise that happened in February 2021.
 I consider a daily analysis and picked a whole year, as time window, to get enough data.
 
-
+## Installation
 ```R
 library(ggplot2)
 library(TSA)
 library(forecast)
+```
 
+## First Analysis
+```R
 GME=read.csv("GME.csv",sep=",");
 GME=data.frame(GME$Date,GME$Adj.Close)
 dt=as.Date(GME$GME.Date, format="%Y-%m-%d");
 X=GME$GME.Adj.Close
-```
-
-    Warning message:
-    "package 'ggplot2' was built under R version 3.6.3"Warning message:
-    "package 'TSA' was built under R version 3.6.3"
-    Attaching package: 'TSA'
-    
-    The following objects are masked from 'package:stats':
-    
-        acf, arima
-    
-    The following object is masked from 'package:utils':
-    
-        tar
-    
-    Warning message:
-    "package 'forecast' was built under R version 3.6.3"Registered S3 method overwritten by 'quantmod':
-      method            from
-      as.zoo.data.frame zoo 
-    Registered S3 methods overwritten by 'forecast':
-      method       from
-      fitted.Arima TSA 
-      plot.Arima   TSA 
-    
-
-
-```R
 GMEg= ggplot(GME, aes(x = dt, y = X)) + geom_line() +
   labs(title="Adjusted Closure of GME in the last year", x="Months", y="Value") +
   scale_x_date(breaks = pretty(dt,n=10),date_labels = "%m");
@@ -77,7 +53,7 @@ plot(x)
 
 The log return percentage is very similar to the simple one.
 
-
+## Analysis of the return
 ```R
 library(fBasics)
 hist(r)
@@ -166,8 +142,10 @@ normalTest(x,method="jb")
     
 
 
-We can easily see, from the result of the function basicStats, that we the skewness is not zero and that the kurtosis is much bigger that 3. One particular thing, that we can notice from this study, other than the fact that our distribution is not normal having p-value equal to $2.2e-16$, is that the mean is not significally different from zero. This is mainly because, although the mean is equal to 2.832840, the variance is very high.\\
-We did this by considering as test for skewness: the null hypothesis equal to $S=0$ and the test statistic: $t=\frac{\hat{S}}{\sqrt{6/T}}\sim \textit{N}(0,1)$.
+We can easily see, from the result of the function basicStats, that we the skewness is not zero and that the kurtosis is much bigger that 3. One particular thing, that we can notice from this study, other than the fact that our distribution is not normal having p-value equal to $2.2e-16$, is that the mean is not significally different from zero. This is mainly because, although the mean is equal to 2.832840, the variance is very high.\
+We did this by considering as test for skewness: the null hypothesis equal to $S=0$ and the test statistic:
+
+![formula](https://render.githubusercontent.com/render/math?math=t=\frac{\hat{S}}{\sqrt{6/T}}\sim\textit{N}(0,1))
 
 
 
@@ -202,13 +180,13 @@ Box.test(r,lag = log(length(r)),type="Ljung-Box")
     
 
 
-We have already the idea that our return are not white noise, we use this this analysis to confirm it.\\
-We see that in both graphics there are some spikes, more precisely, in the pacf's graph, we see that we have the higher values in 2,3,4 and 10, so we will use this lags for our future analysis.\\
-Finally we look at the results from the Box.test to confirm that our data are not White Noise.\\
+We have already the idea that our return are not white noise, we use this this analysis to confirm it.\
+We see that in both graphics there are some spikes, more precisely, in the pacf's graph, we see that we have the higher values in 2,3,4 and 10, so we will use this lags for our future analysis.\
+Finally we look at the results from the Box.test to confirm that our data are not White Noise.
 
 Firstly we use the Akaike's information criterior to choose the number of parameters for our autoregressive model, then we find the characteristic roots of the equation.
 
-
+## Model
 ```R
 ar(r)$aic
 M=Arima(r,order = c(10,0,0))
@@ -220,13 +198,7 @@ Mod(croots)
 ```
 
 
-<style>
-.dl-inline {width: auto; margin:0; padding: 0}
-.dl-inline>dt, .dl-inline>dd {float: none; width: auto; display: inline-block}
-.dl-inline>dt::after {content: ":\0020"; padding-right: .5ex}
-.dl-inline>dt:not(:first-of-type) {padding-left: .5ex}
-</style><dl class=dl-inline><dt>0</dt><dd>32.1232690673944</dd><dt>1</dt><dd>32.743087818983</dd><dt>2</dt><dd>28.187781179015</dd><dt>3</dt><dd>22.0529702244726</dd><dt>4</dt><dd>0.0647341602300457</dd><dt>5</dt><dd>2.02691160555992</dd><dt>6</dt><dd>3.73155885533311</dd><dt>7</dt><dd>5.46344913088046</dd><dt>8</dt><dd>4.63953766485861</dd><dt>9</dt><dd>4.05553831230645</dd><dt>10</dt><dd>0</dd><dt>11</dt><dd>1.10013775465586</dd><dt>12</dt><dd>3.10012213427353</dd><dt>13</dt><dd>3.83966095178653</dd><dt>14</dt><dd>5.21920531331602</dd><dt>15</dt><dd>6.08313074590455</dd><dt>16</dt><dd>4.8417141506236</dd><dt>17</dt><dd>5.35484336443506</dd><dt>18</dt><dd>7.12759306421594</dd><dt>19</dt><dd>6.91401615364998</dd><dt>20</dt><dd>6.50799639904699</dd><dt>21</dt><dd>6.80794438832572</dd><dt>22</dt><dd>8.45961564506365</dd><dt>23</dt><dd>10.3852452670158</dd></dl>
-
+<dl class=dl-inline><dt>0</dt><dd>32.1232690673944</dd><dt>1</dt><dd>32.743087818983</dd><dt>...</dt><dd>...</dd><dt>10</dt><dd>0</dd><dt>11</dt><dd>1.10013775465586</dd><dt>...</dt><dd>...</dd>
 
 
 
@@ -243,16 +215,12 @@ Mod(croots)
 
 
 
-<style>
-.list-inline {list-style: none; margin:0; padding: 0}
-.list-inline>li {display: inline-block}
-.list-inline>li:not(:last-child)::after {content: "\00b7"; padding: 0 .5ex}
-</style>
+
 <ol class=list-inline><li>0.860536475476584</li><li>0.894471581701726</li><li>0.894471581701726</li><li>0.860536475476584</li><li>0.841992591467478</li><li>0.841098786829885</li><li>0.841992591467478</li><li>0.760171346936879</li><li>0.76017134693688</li><li>0.841098786829885</li></ol>
 
 
 
-We see that the number of our parameter is 10 and that the modulus of our characteristic roots is always smaller than 1, so our series is stationary. In the end we analyse the residuals.\\ 
+We see that the number of our parameter is 10 and that the modulus of our characteristic roots is always smaller than 1, so our series is stationary. In the end we analyse the residuals.
 
 
 ```R
@@ -350,7 +318,7 @@ lines(c(rep(NA,k-10),x[T],P$pred-1.96*P$se),col="red",lwd=2,lty=2)
 ![png](images/output_24_0.png)
 
 
-In the end we can see that, except from the first two data, the other one are similar and inside the prediction interval of 95\%. \\
+In the end we can see that, except from the first two data, the other one are similar and inside the prediction interval of 95\%. \
 I don't think that this prediction model is good. It is good when the behaviour is constant but when the returns get strange value then the prediction is completely wrong
 
 
