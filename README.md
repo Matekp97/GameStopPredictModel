@@ -4,6 +4,9 @@ I've decided to analyse and study the action of Gamestop, more precisely the adj
 I consider a daily analysis and picked a whole year, as time window, to get enough data.
 The dataset has been taken by yahoo finance and can be updated by downloaded by https://it.finance.yahoo.com/quote/GME/history?p=GME
 
+## Useful Information
+Please note that with linear modeling (Arima) we assume the timeseries has a recurring pattern in its behaviour, therefore it might not be suitable to use Arima to model a time series which has had a big one off shock withios in this case. However this is just an example of a study for a project.
+
 ## Installation
 ```R
 library(ggplot2)
@@ -191,38 +194,17 @@ Firstly we use the Akaike's information criterior to choose the number of parame
 ```R
 ar(r)$aic
 M=Arima(r,order = c(10,0,0))
-Arima(r,order = c(4,0,0))
-
-roots = polyroot(c(1,-M$coef[1:10])) 
+M=Arima(r,order = c(4,0,0),fixed=c(0,NA,NA,NA,NA))
+roots = polyroot(c(1,-M$coef[1:4])) 
 croots = 1/roots
 Mod(croots)
 ```
 
-
-<dl class=dl-inline><dt>0</dt><dd>32.1232690673944</dd><dt>1</dt><dd>32.743087818983</dd><dt>...</dt><dd>...</dd><dt>10</dt><dd>0</dd><dt>11</dt><dd>1.10013775465586</dd><dt>...</dt><dd>...</dd>
-
+<ol class=list-inline><li>0.673277056426473</li><li>0.795040188963044</li><li>0.795040188963044</li><li>0.673277056426473</li></ol>
 
 
-    Series: r 
-    ARIMA(4,0,0) with non-zero mean 
-    
-    Coefficients:
-             ar1     ar2     ar3      ar4    mean
-          0.0897  0.1973  0.1898  -0.3033  2.8572
-    s.e.  0.0601  0.0593  0.0592   0.0602  1.2349
-    
-    sigma^2 estimated as 265.3:  log likelihood=-1050.09
-    AIC=2112.17   AICc=2112.52   BIC=2133.3
-
-
-
-
-<ol class=list-inline><li>0.860536475476584</li><li>0.894471581701726</li><li>0.894471581701726</li><li>0.860536475476584</li><li>0.841992591467478</li><li>0.841098786829885</li><li>0.841992591467478</li><li>0.760171346936879</li><li>0.76017134693688</li><li>0.841098786829885</li></ol>
-
-
-
-We see that the number of our parameter is 10 and that the modulus of our characteristic roots is always smaller than 1, so our series is stationary. In the end we analyse the residuals.
-
+We see that the number of our parameter would be 0, but by studying the AIK and the BIC we can notice that the AR(4) is more parsimonius and it have similar value. Therefore we will consider AR(4), with the first parameter fixed to 0, as it is not significant.
+Moreover the modulus of our characteristic roots is always smaller than 1, so our series is stationary. In the end we analyse the residuals.
 
 ```R
 res = M$residuals
@@ -244,7 +226,7 @@ acf(res)
 
 
 ```R
-Box.test(res,lag = 25, fitdf=10)
+Box.test(res,lag = 25, fitdf=4)
 tsdiag(M)
 normalTest(res,method="jb")
 ```
@@ -254,7 +236,7 @@ normalTest(res,method="jb")
     	Box-Pierce test
     
     data:  res
-    X-squared = 17.451, df = 15, p-value = 0.2926
+    X-squared = 31.149, df = 21, p-value = 0.07122
     
 
 
@@ -265,29 +247,27 @@ normalTest(res,method="jb")
     
     Test Results:
       STATISTIC:
-        X-squared: 2331.6508
+        X-squared: 4117.8796
       P VALUE:
         Asymptotic p Value: < 2.2e-16 
     
     Description:
-     Sun Jan 23 17:38:19 2022 by user: Mattia
+     Tue Jan 25 00:14:22 2022 by user: Mattia
     
 
 
 
 ![png](images/output_20_2.png)
 
-
 We can see that they are not a serially correlated sequence, and they not normally distributed.
 
 To conclude the project, we will use the function predict to forecast our series.
-
 
 ```R
 T=length(r)
 t=T-10
 Fr=r[1:t]
-FM=Arima(Fr,order = c(10,0,0))
+FM=Arima(Fr,order = c(4,0,0),fixed=c(0,NA,NA,NA,NA))
 P = predict(FM,10)                           
 ls.str(P)                                      
 plot(c(Fr,P$pred))
@@ -295,8 +275,8 @@ points(c(rep(NA,240),P$pred),col="red")
 ```
 
 
-    pred :  Time-Series [1:10] from 241 to 250: 0.326 -2 -1.123 6.056 2.85 ...
-    se :  Time-Series [1:10] from 241 to 250: 15.7 15.8 16.2 16.8 17 ...
+    pred :  Time-Series [1:10] from 241 to 250: 2.977 0.784 2.69 5.382 2.393 ...
+    se :  Time-Series [1:10] from 241 to 250: 16.1 16.1 16.4 16.8 17.3 ...
 
 
 
@@ -318,10 +298,8 @@ lines(c(rep(NA,k-10),x[T],P$pred-1.96*P$se),col="red",lwd=2,lty=2)
 
 ![png](images/output_24_0.png)
 
-
-In the end we can see that, except from the first two data, the other one are similar and inside the prediction interval of 95\%. \
+In the end we can see that, except from the first two data, the other one are similar and inside the prediction interval of 95%.
 I don't think that this prediction model is good. It is good when the behaviour is constant but when the returns get strange value then the prediction is completely wrong
-
 
 ```R
 
