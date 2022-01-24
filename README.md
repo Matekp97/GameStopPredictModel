@@ -2,6 +2,7 @@
 
 I've decided to analyse and study the action of Gamestop, more precisely the adjusted closure after the big raise that happened in February 2021.
 I consider a daily analysis and picked a whole year, as time window, to get enough data.
+The dataset has been taken by yahoo finance and can be updated by downloaded by https://it.finance.yahoo.com/quote/GME/history?p=GME
 
 ## Installation
 ```R
@@ -39,7 +40,7 @@ plot(r)
 ![png](images/output_4_0.png)
 
 
-Here as before we can see that most of time the simple percentage return is near zero. We can see an exception on the last days of the study where it diverges a lot.
+Here as before we can see that most of time the simple percentage return is near zero. We can see an exception on the last days of the study where there is a volatility cluster.
 
 
 ```R
